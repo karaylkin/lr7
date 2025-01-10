@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курсы валют</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #currency-data {
+            margin-top: 20px;
+        }
+        .currency-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Курсы валют</h1>
+    <div id="currency-data">Загрузка данных...</div>
+
+    <script>
+        const socket = io("http://127.0.0.1:5000");  // Подключение к серверу
+
+        // Получение ID клиента
+        socket.on('client_id', (clientId) => {
+            console.log("Подключен клиент с ID:", clientId);
+        });
+
+        // Обновление данных валют
+        socket.on('currency_update', (data) => {
+            console.log("Обновление курсов валют:", data);
+
+            const currencyDiv = document.getElementById('currency-data');
+            currencyDiv.innerHTML = ''; // Очистить старые данные
+
+            // Добавление данных на страницу
+            for (const [key, value] of Object.entries(data)) {
+                const item = document.createElement('div');
+                item.className = 'currency-item';
+                item.textContent = `${value.Name}: ${value.Value.toFixed(2)} руб.`;
+                currencyDiv.appendChild(item);
+            }
+        });
+
+        // Обработка ошибок соединения
+        socket.on('connect_error', (error) => {
+            console.error("Ошибка соединения:", error);
+        });
+    </script>
+</body>
+</html>
